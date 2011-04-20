@@ -9,7 +9,8 @@ typedef struct Screen {
     void* pixels;
 } Screen;
 
-void Screen_render(Screen* self, Scene* scene);
+void Screen_render2D(Screen* self, Scene* scene);
+void Screen_render3D(Screen* self, Scene* scene);
 
 #endif
 
