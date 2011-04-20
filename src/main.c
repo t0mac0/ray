@@ -14,6 +14,10 @@ Scene* mkScene() {
                                      Color_new(255, 255, 200)));
     Scene_addSphere(self, Sphere_new(Vec3_new(5, -5, 75), 10,
                                      Color_new(180, 100, 30)));
+    Scene_addSphere(self, Sphere_new(Vec3_new(0, 3, 80), 6,
+                                     Color_new(0, 100, 200)));
+    Scene_addSphere(self, Sphere_new(Vec3_new(-7, 0, 90), 6,
+                                     Color_new(100, 0, 100)));
     return self;
 }
 

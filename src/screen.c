@@ -1,5 +1,7 @@
 #include "screen.h"
 
+#define SEP3D 1.0f
+
 void Screen_render2D(Screen* self, Scene* scene) {
     Vec3 origin = Vec3_new(0, 0, -5.0f);
     float sy =  0.005f * (float)self->height;
@@ -19,8 +21,8 @@ void Screen_render2D(Screen* self, Scene* scene) {
 }
 
 void Screen_render3D(Screen* self, Scene* scene) {
-    Vec3 originL = Vec3_new(-0.5f, 0, -5.0f);
-    Vec3 originR = Vec3_new(-0.5f, 0, -5.0f);
+    Vec3 originL = Vec3_new(-SEP3D, 0, -5.0f);
+    Vec3 originR = Vec3_new( SEP3D, 0, -5.0f);
 
     float sy =  0.005f * (float)self->height;
     float sx = -0.0025f * (float)self->width;
