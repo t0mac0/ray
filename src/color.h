@@ -2,6 +2,7 @@
 #define COLOR_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef struct Color Color;
 
@@ -55,6 +56,12 @@ static inline Color Color_mul(Color a, Color b) {
         bindcolor(((int)a.g * (int)b.g) / 255),
         bindcolor(((int)a.b * (int)b.b) / 255)
     );
+}
+
+static inline bool Color_far(Color a, Color b) {
+    return (a.r - b.r > 8) || (b.r - a.r > 8) ||
+           (a.g - b.g > 8) || (b.g - a.g > 8) ||
+           (a.b - b.b > 8) || (b.b - a.b > 8);
 }
 
 #endif
