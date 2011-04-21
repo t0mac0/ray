@@ -117,8 +117,7 @@ Color Scene_cast_(Scene* self, Vec3 origin, Vec3 dir, int depth) {
             if (material.specular > 0) {
                 Vec3 lightrefl = Vec3_scale(normal,
                            2.0f * Vec3_dot(lightdir, normal));
-                lightrefl = Vec3_normal(Vec3_sub(lightdir, lightrefl));
-
+                lightrefl = Vec3_sub(lightdir, lightrefl);
                 float spec = Vec3_dot(dir, lightrefl);
                 if (spec > 0) {
                     spec = powf(spec, 20) * material.specular;
@@ -134,7 +133,6 @@ Color Scene_cast_(Scene* self, Vec3 origin, Vec3 dir, int depth) {
     if (material.reflection > 0) {
         Vec3 reflected = Vec3_scale(normal, 2 * Vec3_dot(normal, dir));
         reflected = Vec3_sub(dir, reflected);
-        reflected = Vec3_normal(reflected);
         Vec3 rorigin = Vec3_add(hit,Vec3_scale(reflected, 0.001f));
         Color component = Scene_cast_(self, rorigin, reflected, depth-1);
         component = Color_mul   (component, material.color);
