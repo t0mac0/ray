@@ -23,6 +23,8 @@ Scene* mkScene() {
                   Material_new(250, 250, 250, 0.3, 0.5, 0.8, 0, 0)));
     Scene_addSphere(self, Sphere_new(Vec3_new(-7, -55, 80), 40,
                   Material_new(0, 100, 100, 0.9, 0.2, 0, 0, 0)));
+    Scene_addSphere(self, Sphere_new(Vec3_new(0, 100, 500), 200,
+                  Material_new(250, 250, 250, 0, 0.5, 0.9, 0, 0)));
     for (int j = 0; j < 4; j++) {
         float y = -35 + j*20;
         for (int i = 0; i < 7; i++) {
