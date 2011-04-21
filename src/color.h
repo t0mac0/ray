@@ -25,9 +25,35 @@ static inline Color Color_new(uint8_t r, uint8_t g, uint8_t b) {
     Color result = {
         .r = r,
         .g = g,
-        .b = b
+        .b = b,
     };
     return result;
+}
+
+#define bindcolor(v) ((v) >= 255 ? 255 : ((v) <= 0 ? 0 : (v)))
+
+static inline Color Color_add(Color a, Color b) {
+    return Color_new(
+        bindcolor((int)a.r + (int)b.r),
+        bindcolor((int)a.g + (int)b.g),
+        bindcolor((int)a.b + (int)b.b)
+    );
+}
+
+static inline Color Color_scale(Color a, float k) {
+    return Color_new(
+        bindcolor((int)((float)a.r * k)),
+        bindcolor((int)((float)a.g * k)),
+        bindcolor((int)((float)a.b * k))
+    );
+}
+
+static inline Color Color_mul(Color a, Color b) {
+    return Color_new(
+        bindcolor(((int)a.r * (int)b.r) >> 8),
+        bindcolor(((int)a.g * (int)b.g) >> 8),
+        bindcolor(((int)a.b * (int)b.b) >> 8)
+    );
 }
 
 #endif
