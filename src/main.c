@@ -11,12 +11,12 @@
 Scene* mkScene() {
     Scene* self = Scene_new();
     Scene_addLight (self, Sphere_new(Vec3_new(-20, 10, 60), 0.4f,
-                                     Color_new(255, 255, 200)));
+                                     Color_new(128, 125, 255)));
     Scene_addLight (self, Sphere_new(Vec3_new(20, 10, 100), 0.4f,
                                      Color_new(255, 255, 255)));
     Scene_addLight (self, Sphere_new(Vec3_new(0, -100, 0), 0.4f,
                                      Color_new(128, 128, 128)));
-    Scene_addLight (self, Sphere_new(Vec3_new(0, 0, -200), 0.4f,
+    Scene_addLight (self, Sphere_new(Vec3_new(0, 0, 200), 0.4f,
                                      Color_new(128, 128, 128)));
     Scene_addSphere(self, Sphere_new(Vec3_new(5, -5, 75), 10,
                                      Color_new(180, 100, 30)));
