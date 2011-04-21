@@ -41,8 +41,13 @@ void Scene_addLight(Scene *self, Sphere* light) {
     self->lights[self->num_lights - 1] = light;
 }
 
+Color Scene_cast (Scene* self, Vec3 origin, Vec3 dir) {
+    return Scene_cast_(self, origin, dir, 4);
+}
 
-Color Scene_cast(Scene* self, Vec3 origin, Vec3 dir) {
+Color Scene_cast_(Scene* self, Vec3 origin, Vec3 dir, int depth) {
+    if (depth == 0)
+        return Color_new(0, 0, 0);
 
     float   lightdist = INFINITY;
     Sphere* light     = NULL;
@@ -76,30 +81,52 @@ Color Scene_cast(Scene* self, Vec3 origin, Vec3 dir) {
         }
     }
 
+    Vec3 hit, normal;
+    Material material;
+
+    // which primitive hit us?
     if (light && lightdist < spheredist) {
         return light->material.color;
     } else if (sphere) {
-        // diffuse me some spheres!!!
-        Vec3 hit = Vec3_add(Vec3_scale(dir, spheredist), origin);
-        Vec3 normal = Sphere_normal(sphere, hit);
-        Color result = Color_new(0,0,0);
-        for (size_t i = 0; i < self->num_lights; i++) {
-            Vec3  lightray = Vec3_sub(self->lights[i]->center, hit);
-            float lightdist = Vec3_mag(lightray);
-            Vec3  lightdir  = Vec3_normal(lightray);
-            float diffusion = Vec3_dot(lightdir, normal);
-            diffusion *= sphere->material.diffusion;
-            if (diffusion <= 0) continue;
-            if (Scene_shadow(self, hit, lightdir, lightdist)) continue;
-            Color component = self->lights[i]->material.color;
-            component = Color_mul(sphere->material.color, component);
-            component = Color_scale(component, diffusion);
-            result = Color_add(result, component);
-        }
-        return result;
+        hit = Vec3_add(Vec3_scale(dir, spheredist), origin);
+        normal = Sphere_normal(sphere, hit);
+        material = sphere->material;
     } else {
         return Color_new(30,30,30);
     }
+
+    Color result = Color_new(0,0,0);
+    
+    // diffusion
+    if (material.diffusion > 0) {
+        for (size_t i = 0; i < self->num_lights; i++) {
+            Vec3  lightray = Vec3_sub(self->lights[i]->center, hit);
+            float lightdist = Vec3_mag(lightray);
+            Vec3  lightdir  = Vec3_scale(lightray, 1.0f/lightdist);
+            float diffusion = Vec3_dot(lightdir, normal);
+            diffusion *= material.diffusion;
+            if (diffusion <= 0) continue;
+            if (Scene_shadow(self, hit, lightdir, lightdist)) continue;
+            Color component = self->lights[i]->material.color;
+            component = Color_mul   (component, material.color);
+            component = Color_scale (component, diffusion);
+            result = Color_add(result, component);
+        }
+    }
+    
+    // calculate reflection
+    if (material.reflection > 0) {
+        Vec3 reflected = Vec3_scale(normal, 2 * Vec3_dot(normal, dir));
+        reflected = Vec3_sub(dir, reflected);
+        reflected = Vec3_normal(reflected);
+        Vec3 rorigin = Vec3_add(hit,Vec3_scale(reflected, 0.001f));
+        Color component = Scene_cast_(self, rorigin, reflected, depth-1);
+        component = Color_mul   (component, material.color);
+        component = Color_scale (component, material.reflection);
+        result = Color_add(result, component);
+    }
+
+    return result;
 }
 
 

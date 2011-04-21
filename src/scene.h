@@ -16,7 +16,8 @@ void Scene_addLight (Scene* self, Sphere* light);
 void Scene_addSphere(Scene* self, Sphere* sphere);
 
 // Use
-Color Scene_cast(Scene* self, Vec3 origin, Vec3 dest);
+Color Scene_cast (Scene* self, Vec3 origin, Vec3 dest);
+Color Scene_cast_(Scene* self, Vec3 origin, Vec3 dest, int depth);
 bool Scene_shadow(Scene* self, Vec3 origin, Vec3 dir, float lightdist);
 
 #endif
