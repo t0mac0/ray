@@ -10,6 +10,7 @@ struct Material {
     float specular;
     float reflection;
     float refraction;
+    float refrindex;
 };
 
 static inline Material Material_new(
@@ -17,14 +18,16 @@ static inline Material Material_new(
     float diffusion,
     float specular,
     float reflection,
-    float refraction
+    float refraction,
+    float refrindex
 ) {
     Material result = {
         .color = Color_new(r, g, b),
         .diffusion  = diffusion,
         .specular   = specular,
         .reflection = reflection,
-        .refraction = refraction
+        .refraction = refraction,
+        .refrindex = refrindex
     };
     return result;
 }

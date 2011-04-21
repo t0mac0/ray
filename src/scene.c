@@ -42,10 +42,11 @@ void Scene_addLight(Scene *self, Sphere* light) {
 }
 
 Color Scene_cast (Scene* self, Vec3 origin, Vec3 dir) {
-    return Scene_cast_(self, origin, dir, 4);
+    return Scene_cast_(self, origin, dir, 1.0, 7);
 }
 
-Color Scene_cast_(Scene* self, Vec3 origin, Vec3 dir, int depth) {
+Color Scene_cast_(Scene* self, Vec3 origin, Vec3 dir,
+                                        float rindex, int depth) {
     if (depth == 0)
         return Color_new(0, 0, 0);
 
@@ -83,6 +84,7 @@ Color Scene_cast_(Scene* self, Vec3 origin, Vec3 dir, int depth) {
 
     Vec3 hit, normal;
     Material material;
+    bool inprim;
 
     // which primitive was hit?
     if (light && lightdist < spheredist) {
@@ -91,6 +93,7 @@ Color Scene_cast_(Scene* self, Vec3 origin, Vec3 dir, int depth) {
         hit = Vec3_add(Vec3_scale(dir, spheredist), origin);
         normal = Sphere_normal(sphere, hit);
         material = sphere->material;
+        inprim = spherein;
     } else {
         return Color_new(30,30,30);
     }
@@ -98,7 +101,7 @@ Color Scene_cast_(Scene* self, Vec3 origin, Vec3 dir, int depth) {
     Color result = Color_new(0,0,0);
     
     // diffusion
-    if (material.diffusion > 0 || material.specular > 0) {
+    if (!inprim && (material.diffusion > 0 || material.specular > 0)) {
         for (size_t i = 0; i < self->num_lights; i++) {
             Vec3  lightray = Vec3_sub(self->lights[i]->center, hit);
             float lightdist = Vec3_mag(lightray);
@@ -130,14 +133,32 @@ Color Scene_cast_(Scene* self, Vec3 origin, Vec3 dir, int depth) {
 
     
     // calculate reflection
-    if (material.reflection > 0) {
+    if (material.reflection > 0 && !inprim) {
         Vec3 reflected = Vec3_scale(normal, 2 * Vec3_dot(normal, dir));
         reflected = Vec3_sub(dir, reflected);
-        Vec3 rorigin = Vec3_add(hit,Vec3_scale(reflected, 0.001f));
-        Color component = Scene_cast_(self, rorigin, reflected, depth-1);
+        Vec3 rorigin = Vec3_add(hit, Vec3_scale(reflected, 0.001f));
+        Color component = Scene_cast_(self, rorigin, reflected,
+                                                    rindex, depth-1);
         component = Color_mul   (component, material.color);
         component = Color_scale (component, material.reflection);
         result = Color_add(result, component);
+    }
+
+    // calculate refraction
+    if (material.refraction > 0) {
+        float rrindex = rindex / material.refrindex;
+        Vec3  anormal = normal;
+        if (inprim) anormal = Vec3_scale(normal, -1.0f);
+        float cosI  = -Vec3_dot(anormal, dir);
+        float cosT2 = 1.0f - rrindex * rrindex * (1.0f - cosI * cosI);
+        if (cosT2 > 0) {
+            Vec3 refracted = Vec3_scale(anormal, rrindex*cosI-sqrtf(cosT2));
+            refracted = Vec3_add(refracted, Vec3_scale(dir, rrindex));
+            Vec3 rorigin = Vec3_add(hit, Vec3_scale(refracted, 0.001f)); 
+            Color component = Scene_cast_(self, rorigin, refracted,
+                                            material.refrindex, depth-1);
+            result = Color_add(result, component);
+        }
     }
 
     return result;
