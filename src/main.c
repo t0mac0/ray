@@ -5,25 +5,24 @@
 
 #include <SDL/SDL.h>
 
+#include <stdbool.h>
 #include "screen.h"
 #include "scene.h"
 
 Scene* mkScene() {
     Scene* self = Scene_new();
     Scene_addLight (self, Sphere_new(Vec3_new(-20, 10, 60), 0.4f,
-                                     Color_new(128, 125, 255)));
-    Scene_addLight (self, Sphere_new(Vec3_new(20, 10, 100), 0.4f,
                                      Color_new(255, 255, 255)));
-    Scene_addLight (self, Sphere_new(Vec3_new(0, -100, 0), 0.4f,
-                                     Color_new(128, 128, 128)));
-    Scene_addLight (self, Sphere_new(Vec3_new(0, 0, 200), 0.4f,
-                                     Color_new(128, 128, 128)));
+    Scene_addLight (self, Sphere_new(Vec3_new(30, 15, 100), 0.4f,
+                                     Color_new(255, 255, 255)));
     Scene_addSphere(self, Sphere_new(Vec3_new(5, -5, 75), 10,
                                      Color_new(180, 100, 30)));
     Scene_addSphere(self, Sphere_new(Vec3_new(0, 3, 80), 6,
                                      Color_new(0, 100, 200)));
     Scene_addSphere(self, Sphere_new(Vec3_new(-7, 0, 90), 6,
                                      Color_new(100, 0, 100)));
+    Scene_addSphere(self, Sphere_new(Vec3_new(-7, -55, 80), 40,
+                                     Color_new(0, 100, 100)));
     return self;
 }
 
@@ -40,7 +39,11 @@ int main(int argc, char** argv) {
         .pitch  = WIDTH*BPP
     };
     Scene *scene = mkScene();
-  
+    Sphere *moving = Sphere_new(Vec3_new(20, 15, 70), 5.0f,
+                                Color_new(100, 180, 100));
+    Scene_addSphere(scene, moving);
+    bool movingLeft = true;
+
     while(1) {
         while(SDL_PollEvent(&event)) {
             switch(event.type) {
@@ -54,6 +57,17 @@ int main(int argc, char** argv) {
         Screen_render3D(&rscreen, scene);
         SDL_UnlockSurface(screen);
         SDL_Flip(screen);
+
+        if (movingLeft) {
+            moving->center.x -= 1.0f;
+            if (moving->center.x < -20.0f)
+                movingLeft = false;
+        } else {
+            moving->center.x += 1.0f;
+            if (moving->center.x > 20.0f)
+                movingLeft = true;
+        }
+
     }
 
 quit:

@@ -1,6 +1,6 @@
 #include "screen.h"
 
-#define SEP3D 0.5f
+#define SEP3D 0.2f
 
 void Screen_render2D(Screen* self, Scene* scene) {
     Vec3 origin = Vec3_new(0, 0, -5.0f);

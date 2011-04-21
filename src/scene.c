@@ -80,16 +80,17 @@ Color Scene_cast(Scene* self, Vec3 origin, Vec3 dir) {
         return light->color;
     } else if (sphere) {
         // diffuse me some spheres!!!
-        Vec3 hit = Vec3_scale(dir, spheredist);
+        Vec3 hit = Vec3_add(Vec3_scale(dir, spheredist), origin);
         Vec3 normal = Sphere_normal(sphere, hit);
         Color result = Color_new(0,0,0);
         for (size_t i = 0; i < self->num_lights; i++) {
-            Vec3 lightray = Vec3_sub(self->lights[i]->center, hit);
-            lightray = Vec3_normal(lightray);
-            float diffusion = Vec3_dot(lightray, normal);
-            if (diffusion < 0) continue;
+            Vec3  lightray = Vec3_sub(self->lights[i]->center, hit);
+            float lightdist = Vec3_mag(lightray);
+            Vec3  lightdir  = Vec3_normal(lightray);
+            float diffusion = Vec3_dot(lightdir, normal);
             diffusion *= 0.9; // built-in diffusion constant for now
-
+            if (diffusion <= 0) continue;
+            if (Scene_shadow(self, hit, lightdir, lightdist)) continue;
             Color component = self->lights[i]->color;
             component = Color_mul(sphere->color, component);
             component = Color_scale(component, diffusion);
@@ -97,7 +98,19 @@ Color Scene_cast(Scene* self, Vec3 origin, Vec3 dir) {
         }
         return result;
     } else {
-        return Color_new(0,0,0);
+        return Color_new(30,30,30);
     }
 }
+
+
+bool Scene_shadow(Scene* self, Vec3 origin, Vec3 dir, float lightdist) {
+    for (size_t i = 0; i < self->num_spheres; i++) {
+        float dist = Sphere_intersect(self->spheres[i], origin, dir);
+        if ((dist > 0.0f) && (dist < lightdist))
+            return true;
+    }
+    return false;
+}
+
+
 

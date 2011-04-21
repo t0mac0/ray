@@ -26,6 +26,7 @@ static inline Color Color_new(uint8_t r, uint8_t g, uint8_t b) {
         .r = r,
         .g = g,
         .b = b,
+        ._ignore_ = 0
     };
     return result;
 }
@@ -50,9 +51,9 @@ static inline Color Color_scale(Color a, float k) {
 
 static inline Color Color_mul(Color a, Color b) {
     return Color_new(
-        bindcolor(((int)a.r * (int)b.r) >> 8),
-        bindcolor(((int)a.g * (int)b.g) >> 8),
-        bindcolor(((int)a.b * (int)b.b) >> 8)
+        bindcolor(((int)a.r * (int)b.r) / 255),
+        bindcolor(((int)a.g * (int)b.g) / 255),
+        bindcolor(((int)a.b * (int)b.b) / 255)
     );
 }
 
