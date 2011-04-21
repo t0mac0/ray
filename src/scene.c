@@ -84,7 +84,7 @@ Color Scene_cast_(Scene* self, Vec3 origin, Vec3 dir, int depth) {
     Vec3 hit, normal;
     Material material;
 
-    // which primitive hit us?
+    // which primitive was hit?
     if (light && lightdist < spheredist) {
         return light->material.color;
     } else if (sphere) {
@@ -98,21 +98,37 @@ Color Scene_cast_(Scene* self, Vec3 origin, Vec3 dir, int depth) {
     Color result = Color_new(0,0,0);
     
     // diffusion
-    if (material.diffusion > 0) {
+    if (material.diffusion > 0 || material.specular > 0) {
         for (size_t i = 0; i < self->num_lights; i++) {
             Vec3  lightray = Vec3_sub(self->lights[i]->center, hit);
             float lightdist = Vec3_mag(lightray);
             Vec3  lightdir  = Vec3_scale(lightray, 1.0f/lightdist);
             float diffusion = Vec3_dot(lightdir, normal);
             diffusion *= material.diffusion;
-            if (diffusion <= 0) continue;
             if (Scene_shadow(self, hit, lightdir, lightdist)) continue;
-            Color component = self->lights[i]->material.color;
-            component = Color_mul   (component, material.color);
-            component = Color_scale (component, diffusion);
-            result = Color_add(result, component);
+            if (diffusion > 0) {
+                Color component = self->lights[i]->material.color;
+                component = Color_mul   (component, material.color);
+                component = Color_scale (component, diffusion);
+                result = Color_add(result, component);
+            }
+
+            // specular.
+            if (material.specular > 0) {
+                Vec3 lightrefl = Vec3_scale(normal,
+                           2.0f * Vec3_dot(lightdir, normal));
+                lightrefl = Vec3_normal(Vec3_sub(lightdir, lightrefl));
+
+                float spec = Vec3_dot(dir, lightrefl);
+                if (spec > 0) {
+                    spec = powf(spec, 20) * material.specular;
+                    Color component = Color_scale(material.color, spec);
+                    result = Color_add(result, component);
+                }
+            }
         }
     }
+
     
     // calculate reflection
     if (material.reflection > 0) {
