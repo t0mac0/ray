@@ -1,7 +1,7 @@
 #include "screen.h"
 
 #define SEP3D 0.2f
-#define SAMPLE 2
+#define SAMPLE 3
 
 void Screen_render2D(Screen* self, Scene* scene) {
     Vec3 origin = Vec3_new(0, 0, -5.0f);
@@ -35,24 +35,49 @@ void Screen_render3D(Screen* self, Scene* scene) {
 
     size_t mx = self->width / 2;
 
-    float fy = sy;
     Color ORc = Color_new(0,0,0); 
     Color OLc = Color_new(0,0,0);
+    float fy = sy;
     for (size_t y = 0; y < self->height; y++, fy += dy) {
-        void* pixelrow = ((char*)self->pixels) + y * self->pitch;
+        Color* pixelrow = (Color*)((char*)self->pixels+y*self->pitch);
         float fx = sx;
         for (size_t x = 0; x < mx-1; x++, fx += dx) {
             Vec3 dir = Vec3_normal(Vec3_new(fx, fy, 5.0f));
             Color Rc = Scene_cast(scene, originR, dir);
             Color Lc = Scene_cast(scene, originL, dir);
+            pixelrow[x]      = Rc;
+            pixelrow[x+mx+1] = Lc;
+            continue;
+        }
+    }
+    fy = sy;
+    for (size_t y = 0; y < self->height; y++, fy += dy) {
+        Color* pixelrow = (Color*)((char*)self->pixels+y*self->pitch);
+        Color* pixelrowU = (Color*)((char*)self->pixels+(y-1)*self->pitch);
+        Color* pixelrowD = (Color*)((char*)self->pixels+(y+1)*self->pitch);
+        float fx = sx;
+        for (size_t x = 0; x < mx-1; x++, fx += dx) {
 
-            if (!Color_far(Rc, ORc) && !Color_far(Lc, OLc)) {
-                ((Color*)pixelrow)[x]      = Rc;
-                ((Color*)pixelrow)[x+mx+1] = Lc;
-                ORc = Rc;
-                OLc = Lc;
-                continue;
+            Color C = pixelrow[x];
+            Color U = y > 0            ? pixelrowU[x] : Color_new(0,0,0);
+            Color D = y < self->height ? pixelrowD[x] : Color_new(0,0,0);
+            Color L = x > 0            ? pixelrow[x-1] : Color_new(0,0,0);
+            Color R = x < mx-1         ? pixelrow[x+1] : Color_new(0,0,0);
+
+            bool req = Color_far(C, U) || Color_far(C, D)
+                    || Color_far(C, L) || Color_far(C, R);
+
+            if (!req) {
+            Color C = pixelrow[x+mx+1];
+            Color U = y > 0           ?pixelrowU[x+mx+1]:Color_new(0,0,0);
+            Color D = y < self->height?pixelrowD[x+mx+1]:Color_new(0,0,0);
+            Color L = x > 0           ?pixelrow[x+mx]:Color_new(0,0,0);
+            Color R = x < mx-1        ?pixelrow[x+mx+2]:Color_new(0,0,0);
+            req = Color_far(C, U) || Color_far(C, D)
+               || Color_far(C, L) || Color_far(C, R);
             }
+
+            if (!req) continue;
 
             int Rr = 0; int Rg = 0; int Rb = 0;
             int Lr = 0; int Lg = 0; int Lb = 0;
