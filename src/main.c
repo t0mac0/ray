@@ -12,17 +12,17 @@
 Scene* mkScene() {
     Scene* self = Scene_new();
     Scene_addLight (self, Sphere_new(Vec3_new(-20, 10, 60), 0.4f,
-                                     Color_new(255, 255, 255)));
+                            Material_new(255, 255, 255, 0, 0, 0)));
     Scene_addLight (self, Sphere_new(Vec3_new(30, 15, 100), 0.4f,
-                                     Color_new(255, 255, 255)));
+                            Material_new(255, 255, 255, 0, 0, 0)));
     Scene_addSphere(self, Sphere_new(Vec3_new(5, -5, 75), 10,
-                                     Color_new(180, 100, 30)));
+                            Material_new(180, 100, 30, 0.7, 0.4, 0)));
     Scene_addSphere(self, Sphere_new(Vec3_new(0, 3, 80), 6,
-                                     Color_new(0, 100, 200)));
+                            Material_new(0, 100, 200, 0.4, 0, 0.5)));
     Scene_addSphere(self, Sphere_new(Vec3_new(-7, 0, 90), 6,
-                                     Color_new(100, 0, 100)));
+                            Material_new(100, 0, 100, 0.2, 0.9, 0)));
     Scene_addSphere(self, Sphere_new(Vec3_new(-7, -55, 80), 40,
-                                     Color_new(0, 100, 100)));
+                            Material_new(0, 100, 100, 0.9, 0, 0)));
     return self;
 }
 
@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
     };
     Scene *scene = mkScene();
     Sphere *moving = Sphere_new(Vec3_new(20, 15, 70), 5.0f,
-                                Color_new(100, 180, 100));
+                             Material_new(100, 180, 100, 0.3, 0.4, 0));
     Scene_addSphere(scene, moving);
     bool movingLeft = true;
 

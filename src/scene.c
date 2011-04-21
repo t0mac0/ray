@@ -77,7 +77,7 @@ Color Scene_cast(Scene* self, Vec3 origin, Vec3 dir) {
     }
 
     if (light && lightdist < spheredist) {
-        return light->color;
+        return light->material.color;
     } else if (sphere) {
         // diffuse me some spheres!!!
         Vec3 hit = Vec3_add(Vec3_scale(dir, spheredist), origin);
@@ -88,11 +88,11 @@ Color Scene_cast(Scene* self, Vec3 origin, Vec3 dir) {
             float lightdist = Vec3_mag(lightray);
             Vec3  lightdir  = Vec3_normal(lightray);
             float diffusion = Vec3_dot(lightdir, normal);
-            diffusion *= 0.9; // built-in diffusion constant for now
+            diffusion *= sphere->material.diffusion;
             if (diffusion <= 0) continue;
             if (Scene_shadow(self, hit, lightdir, lightdist)) continue;
-            Color component = self->lights[i]->color;
-            component = Color_mul(sphere->color, component);
+            Color component = self->lights[i]->material.color;
+            component = Color_mul(sphere->material.color, component);
             component = Color_scale(component, diffusion);
             result = Color_add(result, component);
         }

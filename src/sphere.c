@@ -1,11 +1,11 @@
 #include "sphere.h"
 #include <stdlib.h>
 
-Sphere* Sphere_new(Vec3 center, float radius, Color color) {
+Sphere* Sphere_new(Vec3 center, float radius, Material material) {
     Sphere* self = calloc(sizeof *self, 1);
     self->center = center;
     self->radius = radius;
-    self->color  = color;
+    self->material = material;
     return self;
 }
 
