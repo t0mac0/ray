@@ -5,9 +5,11 @@
 
 #include <SDL/SDL.h>
 
+#include <time.h>
 #include <stdbool.h>
 #include "screen.h"
 #include "scene.h"
+#include "twister.h"
 
 Scene* mkScene() {
     Scene* self = Scene_new();
@@ -48,11 +50,11 @@ int main(int argc, char** argv) {
         .height = HEIGHT,
         .pitch  = WIDTH*BPP
     };
+    Twister* twister = Twister_new(time(NULL));
     Scene *scene = mkScene();
-    Sphere *moving = Sphere_new(Vec3_new(20, 15, 70), 5.0f,
-                Material_new(100, 180, 100, 0.3, 0.7, 0.4, 0, 0));
+    Sphere *moving = Sphere_new(Vec3_new(0, 5, 50), 5.0f,
+                Material_new(100, 180, 100, 0.6, 0.7, 0, 0.5, 1.05f));
     Scene_addSphere(scene, moving);
-    bool movingLeft = true;
 
     while(1) {
         while(SDL_PollEvent(&event)) {
@@ -68,16 +70,9 @@ int main(int argc, char** argv) {
         SDL_UnlockSurface(screen);
         SDL_Flip(screen);
 
-        if (movingLeft) {
-            moving->center.x -= 1.0f;
-            if (moving->center.x < -20.0f)
-                movingLeft = false;
-        } else {
-            moving->center.x += 1.0f;
-            if (moving->center.x > 20.0f)
-                movingLeft = true;
-        }
-
+        moving->center.x += Twister_float(twister) - 0.5;
+        moving->center.y += Twister_float(twister) - 0.5;
+        moving->center.z += Twister_float(twister) - 0.5;
     }
 
 quit:

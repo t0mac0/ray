@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define FARNESS 16
 
 typedef struct Color Color;
 
@@ -60,6 +59,7 @@ static inline Color Color_mul(Color a, Color b) {
     );
 }
 
+#define FARNESS 16
 static inline bool Color_far(Color a, Color b) {
     return (a.r - b.r > FARNESS) || (b.r - a.r > FARNESS) ||
            (a.g - b.g > FARNESS) || (b.g - a.g > FARNESS) ||
